@@ -19,7 +19,6 @@ const Login = () => {
 
     const router = useRouter();
     const {register,handleSubmit,formState:{errors},} = useForm<Inputs>();
-    const { setCompletedTasks } = useAppContext();
     const onSubmit:SubmitHandler<Inputs> = async(data) => {
         await signInWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
