@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { FaPaperPlane } from "react-icons/fa";
 import { db } from '../firebase';
 import { Timestamp, addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp,getDocs, runTransaction, Transaction, deleteDoc } from 'firebase/firestore';
 import { useAppContext } from '@/context/AppContext';
-import OpenAI from "openai";
 import LoadingIcons from 'react-loading-icons'
 import { MicrophoneIcon, StopIcon } from '@heroicons/react/24/solid'
 import { useStopwatch } from 'react-timer-hook'
@@ -87,24 +85,12 @@ const Chat = () => {
     const [allTasksCompleted, setAllTasksCompleted] = useState(false);
 
 
-   
-
-    //const searchEndedRef = useRef(false);
-    //const audioRef = useRef<HTMLAudioElement | null>(null); // Audioオブジェクトを管理
 
 
     // ローカルストレージから完了状態を読み込む
     useEffect(() => {
         const storedCompletedTasks = localStorage.getItem('completedTasks');
-        // if (storedCompletedTasks) {
-        //     setCompletedTasks(JSON.parse(storedCompletedTasks));
 
-        // }
-        // if (storedCompletedTasks !== null) {
-        //   const tasks = JSON.parse(storedCompletedTasks);
-        //   // 全てのタスクが完了しているかチェック
-        //   const allCompleted = Object.keys(tasks).length > 0 && Object.values(tasks).every(status => status);
-        //   setAllTasksCompleted(allCompleted);
         if (storedCompletedTasks !== null) {
           const tasks = JSON.parse(storedCompletedTasks);
           // 期待する全てのタスクのリスト
@@ -127,18 +113,6 @@ const Chat = () => {
         recorder.current = new MicRecorder({ bitRate: 128 })
       }, [])
 
-    //   useEffect(() => {
-    //     // アンケートの状態をlocalStorageから読み込む
-    //     const survey1Completed = localStorage.getItem('アンケート1');
-    //     const survey2Completed = localStorage.getItem('アンケート2');
-    //     const survey3Completed = localStorage.getItem('アンケート3');
-    //     const finalSurveyCompleted = localStorage.getItem('最終アンケート');
-    
-    //     // 特定のアンケートがlocalStorageに存在しない場合、アンケート画面を表示する
-    //     if (!survey1Completed || !survey2Completed || !survey3Completed || !finalSurveyCompleted) {
-    //         setIsSurveyVisible(prev => ({ ...prev, [selectRoomName ?? '']: true }));
-    //     }
-    // }, [selectRoomName]);
 
 
     //各ルームのメッセージを取得する
@@ -174,127 +148,6 @@ const Chat = () => {
 
 
 
-    // 8秒間ユーザ発話がなければ自動的にchatgpt_auto_recommendのAPIを呼び出す
-    useEffect(() => {
-      const checkAutoRecommend = async () => {
-        if (!userId) {
-          console.error("userId is null or undefined");
-          return;
-        }
-        const userDocRef = doc(db, "users", userId);
-        const userSnapshot = await getDoc(userDocRef);
-        const userData = userSnapshot.data();
-
-        console.log("Checking auto recommend conditions:");
-        //console.log("transcript:", transcript);
-        console.log("autoRecommendCalled:", autoRecommendCalled);
-        console.log("isBotResponding:", isBotResponding);
-        console.log("recording:", recording);
-       // console.log("searchEndedRef.current:", searchEndedRef.current);
-        console.log("userData.groupNumber:", userData?.groupNumber)
-       
-//shouldCallWithTimeoutの条件をroomNameを使用して評価　//修正必要
-const shouldCallWithTimeout = (
-  (userData?.groupNumber >= 1 && userData?.groupNumber <= 3 && selectRoomName === 'タスク3') ||
-  (userData?.groupNumber >= 4 && userData?.groupNumber <= 6 && selectRoomName === 'タスク1') ||
-  (userData?.groupNumber >= 7 && userData?.groupNumber <= 9 && selectRoomName === 'タスク2')
-);
-  
-        if (shouldCallWithTimeout) {
-          const timer = setTimeout(async () => {
-            if ( !autoRecommendCalled && !isBotResponding && !recording && !isLoading && calledWithTimeout) { // 録音中でないことを確認 !transcript &&
-              setAutoRecommendCalled(true); // API呼び出しフラグを設定
-              const apiUrl = '/api/openai/chatgpt_auto_recommend';
-              const body = JSON.stringify({ text: '', history });
-  
-              try {
-                const response = await fetch(apiUrl, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body,
-                });
-  
-                const response_data = await response.json();
-                const botres = response_data.airesponse;
-  
-                if (botres) {
-                  const userDocRef = doc(db, "users", userId);
-                  const roomsCollectionRef = collection(userDocRef, "rooms");
-                  const roomDocRef = doc(roomsCollectionRef, selectedRoom ?? "defaultRoom");
-                  const messageCollectionRef = collection(roomDocRef, "messages");
-
-                  const botMessageRef = await addDoc(messageCollectionRef, {
-                    text: botres,
-                    sender: "bot",
-                    createdAt: serverTimestamp(),
-                    endTime: null,
-                  });
-                 
-
-                  //setLastBotMessageId(botMessageRef.id); // 最後のボットメッセージIDを保存
-  
-                  setHistory(prevHistory => [...prevHistory, { role: 'assistant', content: botres }]);
-  
-                  const body = JSON.stringify({ text: botres });
-                  const response = await fetch('/api/openai/tts', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body,
-                  });
-  
-                  if (!response.ok) {
-                    throw new Error('レスポンスがネットワーク問題により再生できません．');
-                  }
-  
-                  const blob = await response.blob();
-                  const url = URL.createObjectURL(blob);
-                  const audio = new Audio(url);
-                  //audioRef.current = audio; // Audioオブジェクトを保存
-  
-                  setIsBotResponding(true);
-                  audio.play();
-                  botStartTime = Timestamp.now();
-                  await setDoc(botMessageRef, { createdAt: botStartTime }, { merge: true });
-  
-                  audio.addEventListener('ended', async () => {
-                    botEndTime = Timestamp.now();
-                    await setDoc(botMessageRef, { endTime: botEndTime }, { merge: true });
-                    setIsBotResponding(false);
-                    setAutoRecommendCalled(false);
-                  });
-                }
-              } catch (error) {
-                console.log(error);
-                setAutoRecommendCalled(false);
-              }
-            }
-          }, 6000);
-          //setCalledWithTimeout(false);
-  
-          setAutoRecommendTimer(timer);
-         
-        }
-      };
-
-      if (botEndTime) {
-        setAutoRecommendCalled(false); // botEndTimeが更新されるたびにリセット
-        checkAutoRecommend();
-      }
-  
-      return () => {
-        if (autoRecommendTimer) {
-          clearTimeout(autoRecommendTimer);
-        }
-      };
-    }, [botEndTime, history, userId, isBotResponding, recording,isLoading,calledWithTimeout])//searchEnded, transcript,]); // isRecordingを依存関係に追加
-
-
-
-
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (selectRoomName && isCountdownActive[selectRoomName] && timeLeft[selectRoomName] > 0) {
@@ -306,11 +159,6 @@ const shouldCallWithTimeout = (
       setCompletedTasks(prev => ({ ...prev, [selectRoomName]: true }));
       setSearchEnd(prev => ({ ...prev, [selectRoomName]: true }));
       setIsSurveyVisible(prev => ({ ...prev, [selectRoomName]: true }));
-      // const confirmResult = window.confirm("10分が経過しました。処理を続行しますか？");
-      //   if(confirmResult){
-      //     setRecording(false);
-      //     setIsCountdownActive(prev => ({ ...prev, [selectRoomName]: false }));     
-
        
     }
     return () => clearTimeout(timer);
@@ -335,7 +183,6 @@ const handleEndSearch = async () => {
   setAutoRecommendCalled(false);
 
 
-    
    
     if (selectRoomName === '事前タスク') {
       if (!userId) {
@@ -353,7 +200,7 @@ const handleEndSearch = async () => {
        
 
         await runTransaction(db, async (transaction: Transaction) => { 
-          const groupNumber = (userCount % 9) + 1; 
+          const groupNumber = (userCount % 4) + 1; 
           transaction.set(userDocRef, { groupNumber: groupNumber }, { merge: true });
           setUserData((prevUserData:any) => ({ ...prevUserData, groupNumber: groupNumber }));
 
@@ -694,16 +541,6 @@ useEffect(() => {
 }, [userId]);
 
 const renderTaskDescription = () => {
-  // if (currentTask === '事前タスク') {
-  //     return (
-  //         <div className='mb-4'>
-  //             <h2 className='text-xl font-bold'>トピック：</h2>
-  //             <p>事前タスクのトピックについて</p>
-  //             <h2 className='text-xl font-bold'>シナリオ：</h2>
-  //             <p>事前タスクのシナリオについての説明文</p>
-  //         </div>
-  //     );
-  // }
 
   const taskOrder:{ [key: number]: string[] } = {
       1: ['事前タスク', 'タスク1', 'タスク2', 'タスク3'],
@@ -726,7 +563,7 @@ const renderTaskDescription = () => {
           return (
               <div className='mb-4'>
                   <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>事前タスクのトピックについて</p>
+                  <p>新しいカメラを購入する</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
                   <p>事前タスクのシナリオについての説明文</p>
                   
@@ -853,9 +690,7 @@ const renderTaskDescription = () => {
                     onClick={startRecording}
                   />
                 </div>
-                {/* <div className="text-white font-bold">
-                  <span>{('0' + minutes).slice(-2)}</span>:<span>{('0' + seconds).slice(-2)}</span>
-                </div> */}
+
               </>
             )}
           </div>
@@ -868,7 +703,6 @@ const renderTaskDescription = () => {
                         検索終了
                     </button>
                 )}
-        {/* <button className='bg-black text-white w-36 h-10 rounded hover:bg-slate-800' onClick={handleEndSearch} disabled={searchEnd}>検索終了</button> */}
         </div>
         </>
     )}

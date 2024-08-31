@@ -18,7 +18,7 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
 
         const mp3 = await openai.audio.speech.create({
             model: "tts-1",
-            voice: "alloy",
+            voice: "nova",
             input: text,
         })
             // 音声データをBufferとして取得
