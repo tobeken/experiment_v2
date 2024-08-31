@@ -16,6 +16,8 @@ type AppContextType = {
     setSelectedRoom:React.Dispatch<React.SetStateAction< string | null>>;
     selectRoomName:string | null;
     setSelectRoomName:React.Dispatch<React.SetStateAction< string | null>>;
+    completedTasks: { [key: string]: boolean }; // 完了したタスクの状態を管理するオブジェクト
+    setCompletedTasks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>; // 状態を更新する関数
 }
 
 const defautContextData = {
@@ -25,7 +27,9 @@ const defautContextData = {
     selectedRoom:null,
     setSelectedRoom: () => {},
     selectRoomName:null,
-    setSelectRoomName: () => {}
+    setSelectRoomName: () => {},
+    completedTasks: {}, // 空のオブジェクトで初期化    completedTasks: {}, // 空のオブジェクトで初期化
+    setCompletedTasks: () => {}, // 空の関数で初期化
 
 }
 
@@ -36,6 +40,7 @@ export function AppProvider({children}:AppProviderProps){
     const [userId,setUserId] = useState<string | null>(null);
     const [selectedRoom,setSelectedRoom] = useState<string | null>(null);
     const [selectRoomName,setSelectRoomName] = useState<string | null>(null);
+    const [completedTasks, setCompletedTasks] = useState<{ [key: string]: boolean }>({});
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth,(newUser) => {
@@ -48,7 +53,9 @@ export function AppProvider({children}:AppProviderProps){
         }
     },[])
 
-    return <AppContext.Provider value={{user,userId,setUser,selectedRoom,setSelectedRoom,selectRoomName,setSelectRoomName}}>{children}</AppContext.Provider>
+    return <AppContext.Provider value={{user,userId,setUser,selectedRoom,setSelectedRoom,selectRoomName,setSelectRoomName,
+        completedTasks,
+        setCompletedTasks,}}>{children}</AppContext.Provider>
 }
 
 export function useAppContext(){

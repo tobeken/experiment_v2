@@ -6,6 +6,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '@/app/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAppContext } from '@/context/AppContext';
 
 
 type  Inputs = {
@@ -18,6 +19,7 @@ const Login = () => {
 
     const router = useRouter();
     const {register,handleSubmit,formState:{errors},} = useForm<Inputs>();
+    const { setCompletedTasks } = useAppContext();
     const onSubmit:SubmitHandler<Inputs> = async(data) => {
         await signInWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
