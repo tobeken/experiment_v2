@@ -94,7 +94,7 @@ const Chat = () => {
         if (storedCompletedTasks !== null) {
           const tasks = JSON.parse(storedCompletedTasks);
           // 期待する全てのタスクのリスト
-          const expectedTasks = ["事前タスク", "タスク1", "タスク2", "タスク3"];
+          const expectedTasks = ["事前タスク", "タスク1", "タスク2"];
           // 全ての期待するタスクがcompletedTasksに含まれているか、かつ全てtrueであるかチェック
           const allCompleted = expectedTasks.every(task => tasks.hasOwnProperty(task) && tasks[task] === true);
           setAllTasksCompleted(allCompleted);
@@ -212,19 +212,15 @@ const handleEndSearch = async () => {
                       let apiUrl = '';
           
                       // API URLを決定
-                      if ([1, 2, 3].includes(groupNumber)) {
+                      if ([1, 2].includes(groupNumber)) {
                         if (roomName === 'タスク1') apiUrl = '/api/openai/chatgpt';
-                        if (roomName === 'タスク2') apiUrl = '/api/openai/chatgpt_with_recommendation';
-                        if (roomName === 'タスク3') apiUrl = '/api/openai/chatgpt_with_timeout';
-                      } else if ([4, 5, 6].includes(groupNumber)) {
-                        if (roomName === 'タスク1') apiUrl = '/api/openai/chatgpt_with_timeout';
+                        if (roomName === 'タスク2') apiUrl = '/api/openai/chatgpt_short_answer';
+                      
+                      } else if ([3,4].includes(groupNumber)) {
+                        if (roomName === 'タスク1') apiUrl = '/api/openai/chatgpt_short_answer';
                         if (roomName === 'タスク2') apiUrl = '/api/openai/chatgpt';
-                        if (roomName === 'タスク3') apiUrl = '/api/openai/chatgpt_with_recommendation';
-                      } else if ([7, 8, 9].includes(groupNumber)) {
-                        if (roomName === 'タスク1') apiUrl = '/api/openai/chatgpt_with_recommendation';
-                        if (roomName === 'タスク2') apiUrl = '/api/openai/chatgpt_with_timeout';
-                        if (roomName === 'タスク3') apiUrl = '/api/openai/chatgpt';
-                      }
+                       
+                      } 
           
                       // systemフィールドにAPI URLを格納
                       if (apiUrl) {
@@ -418,24 +414,19 @@ const uploadToFirebase = async (audioBlob: Blob) => {
             if (userData && userData.groupNumber) {
               const { groupNumber } = userData;
 
-              // groupNumber: 1, 2, 3 の場合
-              if ([1, 2, 3].includes(groupNumber)) {
-                  if (selectRoomName === 'タスク2') apiUrl = '/api/openai/chatgpt_with_recommendation';
-                  if (selectRoomName === 'タスク3') apiUrl = '/api/openai/chatgpt_with_timeout';
+              // groupNumber: 1, 2の場合
+              if ([1, 2].includes(groupNumber)) {
+                  if (selectRoomName === 'タスク1') apiUrl = '/api/openai/chatgpt';
+                  if (selectRoomName === 'タスク2') apiUrl = '/api/openai/chatgpt_short_answer';
  
               }
-              // groupNumber: 4, 5, 6 の場合
-              else if ([4, 5, 6].includes(groupNumber)) {
-                  if (selectRoomName === 'タスク1') apiUrl = '/api/openai/chatgpt_with_timeout';
-                  if (selectRoomName === 'タスク3') apiUrl = '/api/openai/chatgpt_with_recommendation';
+              // groupNumber: 3,4の場合
+              else if ([3,4].includes(groupNumber)) {
+                  if (selectRoomName === 'タスク1') apiUrl = '/api/openai/chatgpt_short_answer';
+                  if (selectRoomName === 'タスク2') apiUrl = '/api/openai/chatgpt';
 
               }
-              // groupNumber: 7, 8, 9 の場合
-              else if ([7, 8, 9].includes(groupNumber)) {
-                  if (selectRoomName === 'タスク1') apiUrl = '/api/openai/chatgpt_with_recommendation';
-                  if (selectRoomName === 'タスク2') apiUrl = '/api/openai/chatgpt_with_timeout';
 
-              }
 
               
           }
@@ -543,15 +534,11 @@ useEffect(() => {
 const renderTaskDescription = () => {
 
   const taskOrder:{ [key: number]: string[] } = {
-      1: ['事前タスク', 'タスク1', 'タスク2', 'タスク3'],
-      4: ['事前タスク', 'タスク1', 'タスク2', 'タスク3'],
-      7: ['事前タスク', 'タスク1', 'タスク2', 'タスク3'],
-      2: ['事前タスク', 'タスク3', 'タスク1', 'タスク2'],
-      5: ['事前タスク', 'タスク3', 'タスク1', 'タスク2'],
-      8: ['事前タスク', 'タスク3', 'タスク1', 'タスク2'],
-      3: ['事前タスク', 'タスク2', 'タスク3', 'タスク1'],
-      6: ['事前タスク', 'タスク2', 'タスク3', 'タスク1'],
-      9: ['事前タスク', 'タスク2', 'タスク3', 'タスク1'],
+      1: ['事前タスク', 'タスク1', 'タスク2'],
+      2: ['事前タスク', 'タスク2', 'タスク1'],
+      3: ['事前タスク', 'タスク1', 'タスク2'],
+      4: ['事前タスク', 'タスク2', 'タスク1'],
+
   };
   
 
@@ -565,7 +552,7 @@ const renderTaskDescription = () => {
                   <h2 className='text-xl font-bold'>トピック：</h2>
                   <p>新しいカメラを購入する</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>事前タスクのシナリオについての説明文</p>
+                  <p>あなたはカメラを購入したいと思っている．カメラの機能を調べて，購入したいカメラを決めましょう．</p>
                   
                   
               </div>
@@ -574,27 +561,18 @@ const renderTaskDescription = () => {
           return (
               <div className='mb-4'>
                   <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>ダークチョコレートの健康への効果について</p>
+                  <p>旅行先を見つける</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>ダークチョコレートの健康効果について，テレビで特集が組まれた結果SNSでバズっています．興味をもったあなたは，最新のアレクサを使って調べることにしました．調べた後は，最近健康食にはまりだした友人にダークチョコレートの健康への効果を伝えようと思っています．調べたことをまとめてください．</p>
+                  <p>あなたには，いきたい旅行先がいくつかあります．旅行先の情報を集めて，最終的に行きたい場所を決めましょう．</p>
               </div>
           );
       case taskSequence[2]:
           return (
               <div className='mb-4'>
                   <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>風力発電について</p>
+                  <p>あなたは気分が落ち込んでいるので，どうしたら良いか知りたい．</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>学校の授業でSDGsのことについて学んだあなた．持続可能な開発の中で自然エネルギーに関して，調べてくるよう先生から宿題が課されました．自然エネルギーに関して調べていく中で風力発電に興味を持ちました．風力発電に関して調べて，調べたことをまとめてください．</p>
-              </div>
-          );
-      case taskSequence[3]:
-          return (
-              <div className='mb-4'>
-                  <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>スティーブン・スピルバーグ監督について</p>
-                  <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>最近映画にはまり，毎週のように金曜ロードショーで映画を見ています．さらにネットフリックスも契約し，毎日のように映画をみています．良い映画がないかなと調べていると，スティーブン・スピルバーグ監督の映画が評価がよいことがわかりました．気になったあなたは，スティーブン・スピルバーグ監督について調べようと思いました．調べたことをまとめてください．</p>
+                  <p>あなたは，なぜか気分が優れない状況が続いています．自分の状況を理解して，対処方法を知りたいと考えています．</p>
               </div>
           );
       default:

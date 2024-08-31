@@ -15,7 +15,7 @@ type Room = {
 
 const deleteDuplicateRooms = async (userId: string) => {
     const userRoomsCollectionRef = collection(db, "users", userId, "rooms");
-    const initialRooms = ["事前タスク","タスク1","タスク2","タスク3"];
+    const initialRooms = ["事前タスク","タスク1","タスク2"];
     const roomsSnapshot = await getDocs(userRoomsCollectionRef);
     const roomCounts = roomsSnapshot.docs.reduce((acc: Record<string, number>, doc) => {
         const name = doc.data().name;
@@ -46,7 +46,7 @@ const SideBar = () => {
 
             // 初期ルームを追加
             const addInitialRooms = async () => {
-                const initialRooms = ["事前タスク","タスク1","タスク2","タスク3"];
+                const initialRooms = ["事前タスク","タスク1","タスク2"];
                 const userDocRef = doc(db, "users", userId);
                 const userDoc = await getDoc(userDocRef);
 

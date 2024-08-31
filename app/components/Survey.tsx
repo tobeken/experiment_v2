@@ -79,7 +79,7 @@ const Survey:React.FC<SurveyProps> = ({ taskName, }) => {
 
 
     function getNextTask(currentTaskName: string): string {
-      const taskOrder = ['タスク1', 'タスク2', 'タスク3'];
+      const taskOrder = ['タスク1', 'タスク2'];
       const currentIndex = taskOrder.indexOf(currentTaskName);
       const nextIndex = currentIndex + 1;
       return taskOrder[nextIndex] || 'タスク完了'; // 次のタスク、またはすべてのタスクが完了した場合
@@ -148,8 +148,8 @@ const Survey:React.FC<SurveyProps> = ({ taskName, }) => {
   setCurrentTask(nextTask); // 新しいタスク名を設定
   //setIsCompleted(true)
 
-  if (taskName === "タスク3") {
-    setShowFollowUpSurvey(true); // タスク3の場合、追加のアンケートを表示
+  if (taskName === "タスク2") {
+    setShowFollowUpSurvey(true); // タスク2の場合、追加のアンケートを表示
   } else {
     // タスク3以外の場合の処理
     setIsCompleted(true);
@@ -218,8 +218,8 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
 
 
-  // タスク3で、かつ追加のアンケートを表示する場合
-  if (taskName === "タスク3" && showFollowUpSurvey) {
+  // タスク2で、かつ追加のアンケートを表示する場合
+  if (taskName === "タスク2" && showFollowUpSurvey) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-xl font-bold mb-4">追加のアンケート</h1>
