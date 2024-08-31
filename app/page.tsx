@@ -5,10 +5,12 @@ import SideBar from "./components/SideBar";
 import Chat from "./components/Chat3";
 import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home() {
   const { user } = useAppContext();
   const router = useRouter();
+  
 
   if(!user){
     router.push('/auth/login')
@@ -21,7 +23,7 @@ export default function Home() {
       <SideBar />
     </div>
     <div className="w-4/5 h-full">
-      <Chat />
+      <Chat  />
     </div>
   </div>
  </div>
