@@ -16,12 +16,12 @@ type AppContextType = {
     setSelectedRoom:React.Dispatch<React.SetStateAction< string | null>>;
     selectRoomName:string | null;
     setSelectRoomName:React.Dispatch<React.SetStateAction< string | null>>;
-    completedTasks: { [key: string]: boolean }; // 完了したタスクの状態を管理するオブジェクト
-    setCompletedTasks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>; // 状態を更新する関数
-    currentTask: string; // 現在のタスク名
-    setCurrentTask: React.Dispatch<React.SetStateAction<string>>; // タスク名を更新する関数
     showTasks: boolean;
     setShowTasks: React.Dispatch<React.SetStateAction<boolean>>;
+    currentTask: string; // 現在のタスク名
+    setCurrentTask: React.Dispatch<React.SetStateAction<string>>; // タスク名を更新する関数
+    completedTasks: { [key: string]: boolean }; // 完了したタスクの状態を管理するオブジェクト
+    setCompletedTasks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>; // 状態を更新する関数
 }
 
 const defautContextData = {
@@ -34,10 +34,10 @@ const defautContextData = {
     setSelectRoomName: () => {},
     showTasks: false,
     setShowTasks: () => {},
-    completedTasks: {}, // 空のオブジェクトで初期化    completedTasks: {}, // 空のオブジェクトで初期化
-    setCompletedTasks: () => {}, // 空の関数で初期化
     currentTask: '事前タスク', // 初期値として事前タスクを設定
     setCurrentTask: () => {}, // 空の関数で初期化
+    completedTasks: {}, // 空のオブジェクトで初期化
+    setCompletedTasks: () => {}, // 空の関数で初期化
 
 }
 
@@ -48,14 +48,25 @@ export function AppProvider({children}:AppProviderProps){
     const [userId,setUserId] = useState<string | null>(null);
     const [selectedRoom,setSelectedRoom] = useState<string | null>(null);
     const [selectRoomName,setSelectRoomName] = useState<string | null>(null);
-    const [completedTasks, setCompletedTasks] = useState<{ [key: string]: boolean }>({});
-    const [currentTask, setCurrentTask] = useState<string>('事前タスク');
     const [showTasks, setShowTasks] = useState<boolean>(false);
+    const [currentTask, setCurrentTask] = useState<string>('事前タスク');
+    const [completedTasks, setCompletedTasks] = useState<{ [key: string]: boolean }>({});
+    
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth,(newUser) => {
             setUser(newUser);
             setUserId(newUser ? newUser.uid : null);
+
+                    // ログイン時にローカルストレージからcompletedTasksを読み込む
+        if (newUser) {
+            const storedCompletedTasks = localStorage.getItem('completedTasks');
+            if (storedCompletedTasks) {
+                setCompletedTasks(JSON.parse(storedCompletedTasks));
+            }
+        }
+
+            
         });
 
         return () => {
@@ -64,10 +75,10 @@ export function AppProvider({children}:AppProviderProps){
     },[])
 
     return <AppContext.Provider value={{user,userId,setUser,selectedRoom,setSelectedRoom,selectRoomName,setSelectRoomName,
-        completedTasks,
-        setCompletedTasks,currentTask,
-        setCurrentTask, showTasks,
-        setShowTasks}}>{children}</AppContext.Provider>
+        showTasks,
+        setShowTasks,currentTask,
+        setCurrentTask,completedTasks,
+        setCompletedTasks,}}>{children}</AppContext.Provider>
 }
 
 export function useAppContext(){

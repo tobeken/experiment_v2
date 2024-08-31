@@ -6,7 +6,10 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '@/app/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { doc, setDoc, getDocs, collection } from "firebase/firestore";
+import { db } from '@/app/firebase';
 import { useAppContext } from '@/context/AppContext';
+
 
 
 type  Inputs = {
@@ -19,9 +22,15 @@ const Login = () => {
 
     const router = useRouter();
     const {register,handleSubmit,formState:{errors},} = useForm<Inputs>();
+    const { setCompletedTasks } = useAppContext(); //
     const onSubmit:SubmitHandler<Inputs> = async(data) => {
         await signInWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
+            const storedCompletedTasks = localStorage.getItem('completedTasks');
+            if (storedCompletedTasks !== null) {
+                const completedTasks = JSON.parse(storedCompletedTasks);
+                setCompletedTasks(completedTasks); // 状態を更新
+            }
 
           router.push("/")
         }).catch((error) => {
@@ -32,6 +41,8 @@ const Login = () => {
             }
         })
     }
+
+
   return (
     <div className='h-screen flex flex-col items-center justify-center'>
         <form onSubmit={handleSubmit(onSubmit)} className='bg-white p-8 rounded-lg shadow-md w-96'>
@@ -71,7 +82,7 @@ const Login = () => {
                 type="submit"
                 className='bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700'>ログイン</button>
             </div>
-            <Link href={"/auth/register"}className='text-blue-500 text-sm font-bold ml-1'>初めてのご利用の方はこちら</Link>
+            <Link href={"/auth/register"}className='text-blue-500 text-sm font-bold ml-1 hidden'>初めてのご利用の方はこちら</Link>
 
         </form>
     </div>
