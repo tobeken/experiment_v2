@@ -6,6 +6,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '@/app/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAppContext } from '@/context/AppContext';
 
 
 type  Inputs = {

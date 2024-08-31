@@ -13,8 +13,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     content: item.content,
   }));
 
-  let content = `あなたは情報検索ができる万能なAIロボットです. およそ150文字で手短にユーザからの質問に答えてください．
-  ユーザからのリクエスト: ${text}`;
+  let content = `
+  相談があった場合，次の形式に沿って答えてください．
+  例：
+  ユーザの質問：英語が上手くなりたいのですが，どうしたらいい？
+  答え：英語が上手くなる方法は４つあります．１つ目は，洋画を見ることです．字幕と合わせてみることで英語力が向上します．他の方法について知りたいですか？
+  このように，全ての解決方法の要約を言わないようにしてください．そして，一つ一つ知りたいかを確認しながら答えてください．
+  
+  \n\nユーザからのリクエスト: ${text}`;
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
@@ -22,6 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   });
 
   const airesponse = response.choices[0].message?.content;
+
+
 
   res.status(200).json({ airesponse });
 }
