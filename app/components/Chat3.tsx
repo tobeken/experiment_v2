@@ -50,7 +50,7 @@ let queryTime: number | null = null;
 
 const Chat = () => {
    
-    const {selectedRoom,selectRoomName,userId,showTasks,setShowTasks,currentTask,completedTasks,setCompletedTasks} = useAppContext();
+    const {selectedRoom,selectRoomName,userId,showTasks,setShowTasks,currentTask,completedTasks,setCompletedTasks,showFollowUpSurvey,setShowFollowUpSurvey} = useAppContext();
     const [inputMessage, setInputMessage] = useState<string>("");
     const [messages,setMessages] = useState<Message[]>([]);
     const [history,setHistory] =useState<HistoryItem[]>([]);
@@ -87,32 +87,97 @@ const Chat = () => {
 
 
 
-    // ローカルストレージから完了状態を読み込む
-    useEffect(() => {
-        const storedCompletedTasks = localStorage.getItem('completedTasks');
+    //ローカルストレージから完了状態を読み込む
+    // useEffect(() => {
+    //     const storedCompletedTasks = localStorage.getItem('completedTasks');
 
-        if (storedCompletedTasks !== null) {
-          const tasks = JSON.parse(storedCompletedTasks);
-          // 期待する全てのタスクのリスト
-          const expectedTasks = ["事前タスク", "タスク1", "タスク2"];
-          // 全ての期待するタスクがcompletedTasksに含まれているか、かつ全てtrueであるかチェック
-          const allCompleted = expectedTasks.every(task => tasks.hasOwnProperty(task) && tasks[task] === true);
-          setAllTasksCompleted(allCompleted);
-        }
-        // }
+    //     if (storedCompletedTasks !== null) {
+    //       const tasks = JSON.parse(storedCompletedTasks);
+    //       // 期待する全てのタスクのリスト
+    //       const expectedTasks = ["事前タスク", "タスク1", "タスク2"];
+    //       // 全ての期待するタスクがcompletedTasksに含まれているか、かつ全てtrueであるかチェック
+    //       const allCompleted = expectedTasks.every(task => tasks.hasOwnProperty(task) && tasks[task] === true);
+    //       setAllTasksCompleted(allCompleted);
+    //     }
+    //     // }
         
-    }, []);
+    // }, []);
 
-    // 完了状態をローカルストレージに保存する
+
+    //完了状態をローカルストレージに保存する
     useEffect(() => {
-        localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-    }, [completedTasks]);
+      // localStorageから既存のcompletedTasksを読み込む
+      const existingCompletedTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
+      // 新しいcompletedTasksの状態を既存のデータにマージする
+      const updatedCompletedTasks = { ...existingCompletedTasks, ...completedTasks };
+      // 更新されたcompletedTasksをlocalStorageに保存
+      localStorage.setItem('completedTasks', JSON.stringify(updatedCompletedTasks));
+  }, [completedTasks]);
 
       useEffect(() => {
         // インスタンス作成
         recorder.current = new MicRecorder({ bitRate: 128 })
       }, [])
 
+    //   useEffect(() => {
+    //     const storedCompletedTasks = localStorage.getItem('completedTasks');
+    
+    //     if (storedCompletedTasks !== null) {
+    //         const tasks = JSON.parse(storedCompletedTasks);
+    //         const expectedTasks = ["事前タスク", "タスク1", "タスク2"];
+    //         const expectedSurveys = ["アンケート事前タスク", "アンケートタスク1", "アンケートタスク2"];
+    
+    //         // 全てのタスクとアンケートが完了しているかチェック
+    //         const allTasksCompleted = expectedTasks.every(task => tasks[task] === true);
+    //         const allSurveysCompleted = expectedSurveys.every(survey => tasks[survey] === true);
+    
+    //         // 最終アンケートの表示条件を修正
+    //         if (tasks["アンケートタスク2"] === true && (tasks["最終アンケート"] === false || tasks["最終アンケート"] === undefined)) {
+    //             setIsSurveyVisible(prev => ({ ...prev, ["最終アンケート"]: true }));
+    //         } else if (allTasksCompleted && !allSurveysCompleted) {
+    //             // まだ完了していないアンケートがある場合
+    //             const incompleteSurvey = expectedSurveys.find(survey => !tasks[survey]);
+    //             if (incompleteSurvey) {
+    //                 setIsSurveyVisible(prev => ({ ...prev, [incompleteSurvey]: true }));
+    //             }
+    //         } else if (!allTasksCompleted) {
+    //             // まだ完了していないタスクがある場合
+    //             const nextTask = expectedTasks.find(task => !tasks[task]);
+    //             if (nextTask) {
+    //                 setRoomName(nextTask);
+    //             }
+    //         } else {
+    //             // 全てのタスクとアンケートが完了している場合
+    //             setAllTasksCompleted(true);
+    //         }
+    //     }
+    // }, []);
+
+      useEffect(() => {
+        const storedCompletedTasks = localStorage.getItem('completedTasks');
+    
+        if (storedCompletedTasks !== null) {
+          const tasks = JSON.parse(storedCompletedTasks);
+          // 期待する全てのタスクのリスト
+          const expectedTasks = ["事前タスク", "タスク1", "タスク2","アンケート事前タスク","アンケートタスク1","アンケートタスク2","最終アンケート"]
+          // 全ての期待するタスクがcompletedTasksに含まれているか、かつ全てtrueであるかチェック
+          const allCompleted = expectedTasks.every(task => tasks.hasOwnProperty(task) && tasks[task] === true);
+          setAllTasksCompleted(allCompleted);
+    
+          // アンケート表示の制御
+          // 事前タスクが完了していて、事前アンケートが未完了の場合、事前タスクのアンケートを表示
+          if (tasks["事前タスク"] === true && !tasks["アンケート事前タスク"]) {
+            setIsSurveyVisible(prev => ({ ...prev, ["事前タスク"]: true }));
+          }
+          // 同様にタスク1とタスク2についてもチェック
+          if (tasks["タスク1"] === true && !tasks["アンケートタスク1"]) {
+            setIsSurveyVisible(prev => ({ ...prev, ["タスク1"]: true }));
+          }
+          if (tasks["タスク2"] === true && !tasks["アンケートタスク2"]) {
+            setIsSurveyVisible(prev => ({ ...prev, ["タスク2"]: true }));
+          }
+        }
+    }, []);
 
 
     //各ルームのメッセージを取得する
@@ -166,6 +231,7 @@ const Chat = () => {
 
 const handleEndSearch = async () => {
   if (window.confirm('本当に終了しますか？') && selectRoomName) {
+
     setCompletedTasks(prev => ({ ...prev, [selectRoomName]: true }));
     setSearchEnd(prev => ({ ...prev, [selectRoomName]: true }));
    // setShowTasks(true);
@@ -426,17 +492,9 @@ const uploadToFirebase = async (audioBlob: Blob) => {
                   if (selectRoomName === 'タスク2') apiUrl = '/api/openai/chatgpt';
 
               }
-
-
               
           }
-          if (apiUrl === '/api/openai/chatgpt_with_timeout') {
-           setCalledWithTimeout(true);
-            }
-            console.log("apiUrl:",apiUrl)
-           console.log("calledWithTimeout",calledWithTimeout)
               
-
           //送信データ
           const body = JSON.stringify({ text : transcript,history:updatedHistory})
           //console.log(body)
@@ -580,18 +638,17 @@ const renderTaskDescription = () => {
   }
 };
 
-
   return (
     <>
     {allTasksCompleted ? (<div>タスクは全て完了しました。</div>) :(
     <div className='bg-main-blue h-full flex flex-col p-4'>
  {isSurveyVisible[selectRoomName ?? ''] ? ( // 修正: nullを空文字列に変換
+ 
         <Survey taskName={selectRoomName ?? ''} /> // nullの場合は空文字列を渡すonSubmit={handleSurveySubmit}
       )  : (
       <>
         <h1 className='text-2xl text-slate-500 font-semibold mb-4'>{selectRoomName}</h1>
         {selectRoomName === currentTask && renderTaskDescription()}
-        {/* {renderTaskDescription()} */}
 
           {selectRoomName && !completedTasks[selectRoomName] && hasStarted[selectRoomName] ? (
             <div className='m-auto text-red-500 text-xl'>
@@ -684,7 +741,8 @@ const renderTaskDescription = () => {
         </div>
         </>
     )}
-    </div>)}
+    </div>)
+    }
     </>
    
     

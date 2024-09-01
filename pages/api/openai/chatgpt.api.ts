@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     content: item.content,
   }));
 
-  let content = `あなたは情報検索ができる万能なAIロボットです. およそ150文字で手短にユーザからの質問に答えてください．
+  let content = `あなたは情報検索ができる万能なAIロボットです. ユーザからの相談や質問に答えてください．
   ユーザからのリクエスト: ${text}`;
 
   const response = await openai.chat.completions.create({

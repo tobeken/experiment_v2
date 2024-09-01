@@ -19,11 +19,13 @@ interface Answers {
   isCompleted: boolean; 
 }
 
+
+
 const Survey:React.FC<SurveyProps> = ({ taskName, }) => {
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  const [showFollowUpSurvey, setShowFollowUpSurvey] = useState<boolean>(false); // 追加のアンケート表示用の状態
-  const {selectRoomName,userId,currentTask, setCurrentTask} = useAppContext();
+  const {selectRoomName,userId,currentTask, setCurrentTask,showFollowUpSurvey, setShowFollowUpSurvey} = useAppContext();
   const [isCompletedFinal, setIsCompletedFinal] = useState<boolean>(false);
+  const [completeCheck,setCompleteCheck] = useState<boolean>(false);
 
   const questions = [
     "この検索エージェントを頻繁に使うと思う",
@@ -43,30 +45,31 @@ const Survey:React.FC<SurveyProps> = ({ taskName, }) => {
     "意見をまとめるうえで必要な情報が十分に集められたと感じた"
   ];
 
-  useEffect(() => {
-    const checkCompletion = async () => {
-      // userIdとtaskNameを使用して、適切な回答をFirebaseから取得
-      const userDocRef = doc(db, "users", userId!);
-      const roomsCollectionRef = collection(userDocRef, "rooms");
-      const roomDocRef = doc(roomsCollectionRef, taskName); // taskNameに基づくドキュメント参照
-      const answersCollectionRef = collection(roomDocRef, "answers");
-      const querySnapshot = await getDocs(answersCollectionRef);
+  // useEffect(() => {
+  //   const checkCompletion = async () => {
+  //     // userIdとtaskNameを使用して、適切な回答をFirebaseから取得
+  //     const userDocRef = doc(db, "users", userId!);
+  //     const roomsCollectionRef = collection(userDocRef, "rooms");
+  //     const roomDocRef = doc(roomsCollectionRef, taskName); // taskNameに基づくドキュメント参照
+  //     const answersCollectionRef = collection(roomDocRef, "answers");
+  //     const querySnapshot = await getDocs(answersCollectionRef);
 
-      querySnapshot.forEach((doc) => {
-        if (doc.exists() && doc.data().isCompleted) {
-          setIsCompleted(true);
-        }
-      });
-    };
+  //     querySnapshot.forEach((doc) => {
+  //       if (doc.exists() && doc.data().isCompleted) {
+  //         setIsCompleted(true);
+  //       }
+  //     });
+  //   };
 
-    checkCompletion();
-  }, [taskName]);
+  //   checkCompletion();
+  // }, [taskName]);
 
 
 
-  useEffect(() => {
-    console.log(`現在のタスクは ${currentTask} です`);
-  }, [currentTask]); // currentTaskが変更されたときに実行
+  // useEffect(() => {
+  //   console.log(`現在のタスクは ${currentTask} です`);
+  // }, [currentTask]); // currentTaskが変更されたときに実行
+
 
     if (isCompleted) {
       // アンケートが送信済みの場合の表示
@@ -93,12 +96,11 @@ const Survey:React.FC<SurveyProps> = ({ taskName, }) => {
     if (!confirmed) return;
 
     //localstorageに最終アンケートを保存する
-    const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
-    completedTasks[`アンケート${taskName}`] = true;
-    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+    const updateTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
+    updateTasks[`アンケート${taskName}`] = true;
+    localStorage.setItem('completedTasks', JSON.stringify(updateTasks));
 
 
-  
     // フォームからのデータを取得
     const formData = new FormData(e.target as HTMLFormElement);
     const ransersId = formData.get("ransersId"); // ユーザーIDを取得
@@ -148,8 +150,10 @@ const Survey:React.FC<SurveyProps> = ({ taskName, }) => {
   setCurrentTask(nextTask); // 新しいタスク名を設定
   //setIsCompleted(true)
 
+
   if (taskName === "タスク2") {
     setShowFollowUpSurvey(true); // タスク2の場合、追加のアンケートを表示
+    
   } else {
     // タスク3以外の場合の処理
     setIsCompleted(true);
@@ -217,10 +221,11 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 };
 
 
-
+//if (taskName === "タスク2" && showFollowUpSurvey) 
   // タスク2で、かつ追加のアンケートを表示する場合
-  if (taskName === "タスク2" && showFollowUpSurvey) {
+  if (showFollowUpSurvey) {
     return (
+        <>
       <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-xl font-bold mb-4">追加のアンケート</h1>
       <form  onSubmit={handleFinalSurveySubmit} className="space-y-4"> 
@@ -342,15 +347,13 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         <button type="submit" className="mt-4 px-4 py-2 bg-custom-blue text-white font-medium rounded-md hover:bg-blue-600">送信する</button>
       </form>
     </div>
+    </>
       
     );
   }
 
-
-
   return (
     <>
-    
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-xl font-bold mb-4">{taskName}に関するアンケート</h1>
     
@@ -390,12 +393,8 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   </div>
 ))}
           <button type="submit" className="mt-4 px-4 py-2 bg-custom-blue text-white font-medium rounded-md hover:bg-blue-600">送信する</button>
-        </form>
-        
-     
-        
-        
-      </div>
+        </form>  
+</div>
     </>
   );
   

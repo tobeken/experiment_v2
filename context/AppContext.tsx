@@ -22,6 +22,8 @@ type AppContextType = {
     setCurrentTask: React.Dispatch<React.SetStateAction<string>>; // タスク名を更新する関数
     completedTasks: { [key: string]: boolean }; // 完了したタスクの状態を管理するオブジェクト
     setCompletedTasks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>; // 状態を更新する関数
+    showFollowUpSurvey: boolean;
+    setShowFollowUpSurvey: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const defautContextData = {
@@ -38,6 +40,9 @@ const defautContextData = {
     setCurrentTask: () => {}, // 空の関数で初期化
     completedTasks: {}, // 空のオブジェクトで初期化
     setCompletedTasks: () => {}, // 空の関数で初期化
+    showFollowUpSurvey: false,
+    setShowFollowUpSurvey: () => {},
+
 
 }
 
@@ -51,6 +56,7 @@ export function AppProvider({children}:AppProviderProps){
     const [showTasks, setShowTasks] = useState<boolean>(false);
     const [currentTask, setCurrentTask] = useState<string>('事前タスク');
     const [completedTasks, setCompletedTasks] = useState<{ [key: string]: boolean }>({});
+    const [showFollowUpSurvey, setShowFollowUpSurvey] = useState<boolean>(false);
     
 
     useEffect(() => {
@@ -78,7 +84,7 @@ export function AppProvider({children}:AppProviderProps){
         showTasks,
         setShowTasks,currentTask,
         setCurrentTask,completedTasks,
-        setCompletedTasks,}}>{children}</AppContext.Provider>
+        setCompletedTasks,showFollowUpSurvey, setShowFollowUpSurvey}}>{children}</AppContext.Provider>
 }
 
 export function useAppContext(){
