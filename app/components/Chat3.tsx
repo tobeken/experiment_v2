@@ -12,6 +12,7 @@ import { setDoc, getDoc } from 'firebase/firestore';
 import Survey from './Survey';
 import { storage } from '../firebase';
 import { ref, uploadBytes } from 'firebase/storage';
+import FinalSurvey from './FinalSurvey';
 
 
 const MicRecorder = require('mic-recorder-to-mp3')
@@ -87,23 +88,6 @@ const Chat = () => {
 
 
 
-    //ローカルストレージから完了状態を読み込む
-    // useEffect(() => {
-    //     const storedCompletedTasks = localStorage.getItem('completedTasks');
-
-    //     if (storedCompletedTasks !== null) {
-    //       const tasks = JSON.parse(storedCompletedTasks);
-    //       // 期待する全てのタスクのリスト
-    //       const expectedTasks = ["事前タスク", "タスク1", "タスク2"];
-    //       // 全ての期待するタスクがcompletedTasksに含まれているか、かつ全てtrueであるかチェック
-    //       const allCompleted = expectedTasks.every(task => tasks.hasOwnProperty(task) && tasks[task] === true);
-    //       setAllTasksCompleted(allCompleted);
-    //     }
-    //     // }
-        
-    // }, []);
-
-
     //完了状態をローカルストレージに保存する
     useEffect(() => {
       // localStorageから既存のcompletedTasksを読み込む
@@ -119,39 +103,6 @@ const Chat = () => {
         recorder.current = new MicRecorder({ bitRate: 128 })
       }, [])
 
-    //   useEffect(() => {
-    //     const storedCompletedTasks = localStorage.getItem('completedTasks');
-    
-    //     if (storedCompletedTasks !== null) {
-    //         const tasks = JSON.parse(storedCompletedTasks);
-    //         const expectedTasks = ["事前タスク", "タスク1", "タスク2"];
-    //         const expectedSurveys = ["アンケート事前タスク", "アンケートタスク1", "アンケートタスク2"];
-    
-    //         // 全てのタスクとアンケートが完了しているかチェック
-    //         const allTasksCompleted = expectedTasks.every(task => tasks[task] === true);
-    //         const allSurveysCompleted = expectedSurveys.every(survey => tasks[survey] === true);
-    
-    //         // 最終アンケートの表示条件を修正
-    //         if (tasks["アンケートタスク2"] === true && (tasks["最終アンケート"] === false || tasks["最終アンケート"] === undefined)) {
-    //             setIsSurveyVisible(prev => ({ ...prev, ["最終アンケート"]: true }));
-    //         } else if (allTasksCompleted && !allSurveysCompleted) {
-    //             // まだ完了していないアンケートがある場合
-    //             const incompleteSurvey = expectedSurveys.find(survey => !tasks[survey]);
-    //             if (incompleteSurvey) {
-    //                 setIsSurveyVisible(prev => ({ ...prev, [incompleteSurvey]: true }));
-    //             }
-    //         } else if (!allTasksCompleted) {
-    //             // まだ完了していないタスクがある場合
-    //             const nextTask = expectedTasks.find(task => !tasks[task]);
-    //             if (nextTask) {
-    //                 setRoomName(nextTask);
-    //             }
-    //         } else {
-    //             // 全てのタスクとアンケートが完了している場合
-    //             setAllTasksCompleted(true);
-    //         }
-    //     }
-    // }, []);
 
       useEffect(() => {
         const storedCompletedTasks = localStorage.getItem('completedTasks');
@@ -637,6 +588,57 @@ const renderTaskDescription = () => {
           return null;
   }
 };
+const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault(); // フォームのデフォルトの送信を防ぐ
+  const confirmed = window.confirm("本当に送信しますか？");
+  if (!confirmed) return;
+
+  const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
+  completedTasks['最終アンケート'] = true;
+  localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+
+  // フォームからのデータを取得
+  const formData = new FormData(e.target as HTMLFormElement);
+  const finalAnswers = {
+    createdAt: new Date(),
+    // フォームのデータを取得してオブジェクトに格納
+    age: formData.get("age"),
+    occupation: formData.get("occupation"),
+    interestInTech: formData.get("interestInTech"),
+    communicationSkill: formData.get("communicationSkill"),
+    voiceAgentUsed: formData.getAll("voiceAgentUsed"),
+    voiceAgentPurpose: formData.getAll("voiceAgentPurpose"),
+    voiceAgentFrequency: formData.get("voiceAgentFrequency"),
+    voiceAgentTrust: formData.get("voiceAgentTrust"),
+    searchBehaviorRatio: formData.get("searchBehaviorRatio"),
+    searchMethodReason: formData.get("searchMethodReason"),
+    voiceSearchTrigger: formData.get("voiceSearchTrigger"),
+    voiceAgentFeedback: formData.get("voiceAgentFeedback"),
+  };
+
+  try {
+    if (!userId) {
+      console.error("userId is null or undefined");
+      return;
+    }
+    const userDocRef = doc(db, "users", userId);
+    //const roomsCollectionRef = collection(userDocRef, "rooms");
+    //const roomDocRef = doc(roomsCollectionRef, "属性アンケート"); // タスク3のドキュメント参照
+    const finalAnswersCollectionRef = collection(userDocRef, "final_answers"); // final_answersコレクションへの参照
+    const finalAnswerDocRef = doc(finalAnswersCollectionRef); // 新しいドキュメントIDを自動生成
+    console.log("Saving final answers:", finalAnswers);
+    await setDoc(finalAnswerDocRef, finalAnswers, { merge: true }); // 最終アンケートの回答データを保存
+    alert("最終アンケートの回答が送信されました。");
+
+    //setIsCompleted(true); // この行を追加
+    setShowFollowUpSurvey(false); // 追加のアンケート表示をオフにする
+    setAllTasksCompleted(true)
+
+  } catch (error) {
+    console.error("最終アンケートの回答の保存に失敗しました: ", error);
+    alert("最終アンケートの回答の送信に失敗しました。");
+  }
+};
 
   return (
     <>
@@ -645,7 +647,9 @@ const renderTaskDescription = () => {
  {isSurveyVisible[selectRoomName ?? ''] ? ( // 修正: nullを空文字列に変換
  
         <Survey taskName={selectRoomName ?? ''} /> // nullの場合は空文字列を渡すonSubmit={handleSurveySubmit}
-      )  : (
+      )  : showFollowUpSurvey ? (
+<FinalSurvey handleFinalSurveySubmit={handleFinalSurveySubmit}/>
+      ) : (
       <>
         <h1 className='text-2xl text-slate-500 font-semibold mb-4'>{selectRoomName}</h1>
         {selectRoomName === currentTask && renderTaskDescription()}
