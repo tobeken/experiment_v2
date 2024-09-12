@@ -45,8 +45,28 @@ const Login = () => {
 
   return (
     <div className='h-screen flex flex-col items-center justify-center'>
+        <div className='flex justify-center items-center w-full'>
+        <div className='bg-white mb-8 w-1/2 p-10 flex justify-around  mx-10 '>       
+            <p className='mb-3'>ランサーズ掲載「音声チャットボットを使った調べ物タスク」開始にあたって
+             本ウェブサイトは，ランサーズにて掲載中の音声チャットボットを使った調べ物タスクを行うためのサイトです．
+             <br />本タスクは，兵庫県立大学大島・山本研究室が実施する研究プロジェクトの一環として行われます． 
+             <br />本タスクでは，タスク依頼者が用意した音声チャットボットを用いて調べ物をしながら，あるトピックに対する調べたことをまとめていただきます．
+             <br/>本タスクは，2つのトピックについて音声チャットボットと会話をしながら調べ物をしていただきます． 
+             調べ物が終了後，トピックについてあなたの調べた結果やシステムに関するアンケートに答えていただきます．
+             全てのタスクの調べ物が終了後，年代や性別などの属性情報をお伺いします．
+             <br />本タスクに参加いただくかどうかは任意で強制でありません． 
+             また，いつでもタスクの途中で参加をやめることができますが， タスクを途中でやめると，タスクの報酬を受け取ることはできませんのでご留意ください．
+             <br />本タスクはPCのみで行うことができます．スマートフォンやタブレットからご参加することはできません．
+             <br />本タスクでは，アンケートに回答いただいいた内容や，タスク中の音声のチャットボットとのやり取りのログを記録させていただきます． ただし，音声の録音は致しません．
+             <br />収集したデータは匿名化されており，学術研究活動以外の目的で使用することはありません． 
+             <br />本タスクについて何か質問があれば，ランサーズID sis_tyamamot までタスク前，タスク中，タスク後いつでも連絡できます．
+             以上をお読みになり同意いただける方のみ，ログインボタンをクリックしてタスクを開始してください．</p>
+        </div>
+        <div className='w-1/2 p-4'>
         <form onSubmit={handleSubmit(onSubmit)} className='bg-white p-8 rounded-lg shadow-md w-96'>
-            <h1 className='mb-4 text-2xl text-gray-700 font-medium'>ログイン</h1>
+   
+            {/* <h1 className='mb-4 text-2xl text-gray-700 font-medium'>ログイン</h1> */}
+           
             <div className='mb-4'>
                 <label className='block text-sm font-medium text-gray-600'>Email</label>
                 <input  {...register("email",{
@@ -83,8 +103,9 @@ const Login = () => {
                 className='bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700'>ログイン</button>
             </div>
             <Link href={"/auth/register"}className='text-blue-500 text-sm font-bold ml-1 hidden'>初めてのご利用の方はこちら</Link>
-
         </form>
+        </div>
+        </div>
     </div>
   )
 }

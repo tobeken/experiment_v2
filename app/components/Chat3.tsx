@@ -13,6 +13,7 @@ import Survey from './Survey';
 import { storage } from '../firebase';
 import { ref, uploadBytes } from 'firebase/storage';
 import FinalSurvey from './FinalSurvey';
+import Image from 'next/image';
 
 
 const MicRecorder = require('mic-recorder-to-mp3')
@@ -422,8 +423,8 @@ const uploadToFirebase = async (audioBlob: Blob) => {
                     const userSnapshot = await getDoc(userDocRef);
                     const userData = userSnapshot.data();
 
-                    console.log("taskSequence:", userData?.taskSequence);
-                    console.log("selectRoomName:", selectRoomName);
+                    //console.log("taskSequence:", userData?.taskSequence);
+                    //console.log("selectRoomName:", selectRoomName);
                     
                 
 
@@ -558,10 +559,13 @@ const renderTaskDescription = () => {
       case taskSequence[0]:
           return (
               <div className='mb-4'>
+                <div className='mb-8 items-center justify-center flex'>
+                <Image src="/lec.jpg" height={400} width={500} alt="利用方法" />
+                </div>
                   <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>新しいカメラを購入する</p>
+                  <p>ダークチョコレート</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>あなたはカメラを購入したいと思っている．カメラの機能を調べて，購入したいカメラを決めましょう．</p>
+                  <p>ダークチョコレートの1日の目安の摂取量について調べてください.</p>
                   
                   
               </div>
@@ -570,18 +574,20 @@ const renderTaskDescription = () => {
           return (
               <div className='mb-4'>
                   <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>旅行先を見つける</p>
+                  <p>広島県に旅行に行く</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>あなたには，いきたい旅行先がいくつかあります．旅行先の情報を集めて，最終的に行きたい場所を決めましょう．</p>
+                  <p>あなたには，広島県に旅行に行こうと思っています．広島県の観光地をリストアップしましょう．最後に調べたことをまとめてください．</p>
               </div>
           );
       case taskSequence[2]:
           return (
               <div className='mb-4'>
                   <h2 className='text-xl font-bold'>トピック：</h2>
-                  <p>あなたは気分が落ち込んでいるので，どうしたら良いか知りたい．</p>
+                  <p>気分が落ち込んでいるので，どうしたら良いか知りたい.</p>
                   <h2 className='text-xl font-bold'>シナリオ：</h2>
-                  <p>あなたは，なぜか気分が優れない状況が続いています．自分の状況を理解して，対処方法を知りたいと考えています．</p>
+                  <p>あなたは，なぜか気分が優れない状況が続いています．自分の状況を理解して，対処方法を知りたいと思っています．対処方法からベストなものを選びましょう．そして，
+最後に調べたことをまとめてください．
+</p>
               </div>
           );
       default:
@@ -642,7 +648,9 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   return (
     <>
-    {allTasksCompleted ? (<div>タスクは全て完了しました。</div>) :(
+    {allTasksCompleted ? (<div>タスクは全て完了しました。タスク完了コードは,
+      「TY2024SCS」です
+    </div>) :(
     <div className='bg-main-blue h-full flex flex-col p-4'>
  {isSurveyVisible[selectRoomName ?? ''] ? ( // 修正: nullを空文字列に変換
  
