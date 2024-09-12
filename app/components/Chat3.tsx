@@ -670,8 +670,9 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         }
 
 
-        <div className='flex-grow overflow-y-auto mb-4'>
-            {messages.map((message,index) => (
+        {/* <div className='flex-grow overflow-y-auto mb-4'> */}
+        <div className='flex grow items-center justify-center'>
+            {/* {messages.map((message,index) => (
                 
                 <div key={index} className={message.sender === "user" ? "text-right" : "text-left"}>
                     <div className={message.sender === "user" ? 'bg-blue-500 inline-block rounded px-4 py-2 mb-2' : 'bg-slate-500 inline-block rounded px-4 py-2 mb-2'}>
@@ -679,8 +680,10 @@ const handleFinalSurveySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     </div>
                 </div>
 
-            ))}
-            {isLoading &&  <LoadingIcons.TailSpin />}
+            ))} */}
+            {/* {isLoading &&  <LoadingIcons.TailSpin />} */}
+            {isLoading &&   <div className="animate-ping h-4 w-4 bg-blue-600 rounded-full"></div>}
+
 
 
         </div>
